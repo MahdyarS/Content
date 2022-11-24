@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Content.Core.Entities.Media
 {
-    internal class Tag : Entity
+    public class Tag : Entity
     {
         public Tag(int propertyId, string value)
         {

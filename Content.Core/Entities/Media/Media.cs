@@ -15,10 +15,9 @@ namespace Content.Core.Entities.Media
         public string? Src { get; set; }
         public DateTime CreatedTime { get; set; }
         public int? PresenterId { get; set; }
-        public int Price { get; set; }
         public bool IsActive { get; set; }
         public string Poster { get; set; }
-
+        public int ProductCode { get; set; }
 
         public Presenter? Presenter { get; set; }
     }
