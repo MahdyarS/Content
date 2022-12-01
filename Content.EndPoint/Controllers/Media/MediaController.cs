@@ -1,5 +1,6 @@
 ﻿using Content.Core.Entities.Media;
 using Content.EndPoint.Models.Media;
+using Content.EndPoint.Models.MediaModels;
 using Content.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,21 +46,29 @@ namespace Content.EndPoint.Controllers.Media
                 PresenterId = req.PresenterId,
                 Type = req.Type,
                 ProductCode = req.ProductCode,
+                IsFree = req.Price == 0
             };
 
             await _context.Set<Core.Entities.Media.Media>().AddAsync(media);
-
-            _ram.MediaAbstracts.Add(new Models.RamModels.MediaAbstract
-            {
-                MediaId = media.Id,
-                Attributes = media.Attributes,
-                Title = media.Title,
-                Poster = media.Poster,
-                IsActive = media.IsActive,
-                Presenter = media.Presenter
-            });
-
+            
             await _context.SaveChangesAsync();
+
+            foreach (var item in req.Attributes)
+            {
+                if(_ram.TagInRams.Any(p => p.TagId == item.Value && p.ExpirationDate > DateTime.Now))
+                {
+                    _ram.MediaInRams.Add(new Models.RamModels.MediaInRam
+                    {
+                        MediaId = media.Id,
+                        Attributes = media.Attributes
+                    });
+                }
+            }
+
+            foreach (var item in _ram.TagInRams)
+            {
+
+            }
 
             return Ok(media.Id);
         }
@@ -91,31 +100,16 @@ namespace Content.EndPoint.Controllers.Media
             media.Title = req.Title;
             media.PresenterId = req.PresenterId;
             media.Type = req.Type;
+            media.IsFree = req.IsFree;
 
             _context.Set<Core.Entities.Media.Media>().Update(media);
 
-            var mediaInRam = _ram.MediaAbstracts.SingleOrDefault(p => p.MediaId == media.Id);
-            if (mediaInRam == null)
-                _ram.MediaAbstracts.Add(new Models.RamModels.MediaAbstract
-                {
-                    MediaId = media.Id,
-                    Attributes = media.Attributes,
-                    Presenter = media.Presenter,
-                    IsActive = media.IsActive,
-                    Poster = media.Poster,
-                    Title = media.Title
-                });
-            else
-            {
-                mediaInRam.Attributes = media.Attributes;
-                mediaInRam.Presenter = media.Presenter;
-                mediaInRam.IsActive = media.IsActive;
-                mediaInRam.Poster = media.Poster;
-                mediaInRam.Title = media.Title;
-            }
-                
-
             await _context.SaveChangesAsync();
+
+            var mediaInRam = _ram.MediaInRams.SingleOrDefault(p => p.MediaId == req.MediaId);
+
+            if(mediaInRam != null)
+                mediaInRam.Attributes = media.Attributes;
 
             return Ok();
         }
@@ -132,20 +126,6 @@ namespace Content.EndPoint.Controllers.Media
             _context.Update(media);
             await _context.SaveChangesAsync();
 
-            var mediaInRam = _ram.MediaAbstracts.SingleOrDefault(p => p.MediaId == media.Id);
-            if (mediaInRam == null)
-                _ram.MediaAbstracts.Add(new Models.RamModels.MediaAbstract
-                {
-                    MediaId = media.Id,
-                    Attributes = media.Attributes,
-                    Presenter = media.Presenter,
-                    IsActive = media.IsActive,
-                    Poster = media.Poster,
-                    Title = media.Title
-                });
-            else
-                mediaInRam.IsActive = media.IsActive;
-
             return Ok();
         }
 
@@ -157,13 +137,25 @@ namespace Content.EndPoint.Controllers.Media
             if (media == null)
                 return NotFound("فایلی جهت نمایش یافت نشد!");
 
-            if (!_context.Set<Core.Entities.Access.MediaAccessInfo>().Any(p => p.MediaId == media.Id && p.UserId == userId))
+            if (!_context.Set<Core.Entities.Access.MediaAccessInfo>().Any(p => p.MediaId == media.Id && p.UserId == userId) && !media.IsFree)
                 return Unauthorized();
 
             return Ok(media);
         }
 
-        
+        [HttpGet("get-by-filter")]
+        public async Task<IActionResult> GetMediaByFilter(List<GetByFilterRequest> filters)
+        {
+            foreach (var item in filters)
+            {
+                foreach (var tag in item.TagIds)
+                {
+
+                }
+            }
+
+            return Ok();
+        }
 
         
     }

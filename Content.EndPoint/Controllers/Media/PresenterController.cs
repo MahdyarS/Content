@@ -3,7 +3,7 @@ using Content.Infrastructure.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Content.EndPoint.Models.Media
+namespace Content.EndPoint.Controllers.Media
 {
     [Route("api/[controller]")]
     [ApiController]

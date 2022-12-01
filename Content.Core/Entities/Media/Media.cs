@@ -18,6 +18,7 @@ namespace Content.Core.Entities.Media
         public bool IsActive { get; set; }
         public string Poster { get; set; }
         public int ProductCode { get; set; }
+        public bool IsFree { get; set; }
 
         public ICollection<MediaTag> MediaTags { get; set; }
         public Presenter? Presenter { get; set; }

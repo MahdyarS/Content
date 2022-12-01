@@ -15,7 +15,8 @@ namespace Content.EndPoint.Controllers.Access
             _context = context;
         }
 
-        public IActionResult AddAccess([FromHeader]int userId,int mediaId,string phoneNumber,string name)
+        [HttpPost("add")]
+        public async Task<IActionResult> AddAccess(int userId,int mediaId,string phoneNumber,string name)
         {
             var media = _context.Set<Core.Entities.Media.Media>().SingleOrDefault(p => p.Id == mediaId);
             if (media == null)
@@ -30,9 +31,21 @@ namespace Content.EndPoint.Controllers.Access
                 FullName = name,
             });
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok();
         }
+
+        [HttpDelete("deny")]
+        public IActionResult DenyAccess(int userId,int mediaId)
+        {
+            var access = _context.Set<Core.Entities.Access.MediaAccessInfo>().SingleOrDefault(p => p.UserId == userId && p.MediaId == mediaId);
+            if (access == null)
+                return NotFound("این کاربر از پیش به این فایل دسترسی ندارد!");
+            _context.Set<Core.Entities.Access.MediaAccessInfo>().Remove(access);
+            _context.SaveChanges();
+            return Ok();
+        }
+
     }
 }

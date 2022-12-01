@@ -1,6 +1,6 @@
 ﻿using Content.Core.Entities.Media;
 
-namespace Content.EndPoint.Models.RamModels
+namespace Content.EndPoint.Models.MediaModels
 {
     public class MediaAbstract
     {
@@ -10,5 +10,6 @@ namespace Content.EndPoint.Models.RamModels
         public Presenter? Presenter { get; set; }
         public string? Poster { get; set; }
         public bool IsActive { get; set; }
+        public bool IsFree { get; set; }
     }
 }

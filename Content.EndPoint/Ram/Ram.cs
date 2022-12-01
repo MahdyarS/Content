@@ -6,7 +6,7 @@ namespace Content.EndPoint.Ram
 {
     public class Ram
     {
-        public ICollection<MediaAbstract> MediaAbstracts { get; set; }
+        public ICollection<MediaInRam> MediaAbstracts { get; set; }
 
         private Context _context;
         private readonly IServiceProvider _provider;
@@ -17,14 +17,10 @@ namespace Content.EndPoint.Ram
             _context = _provider.GetService<Context>();
 
             MediaAbstracts = _context.Set<Media>()
-            .Select(p => new MediaAbstract 
+            .Select(p => new MediaInRam
             {
                 MediaId = p.Id,
                 Attributes = p.Attributes,
-                Presenter = p.Presenter,
-                IsActive = p.IsActive,
-                Poster = p.Poster,
-                Title = p.Title
             }).ToList();
         }
     }

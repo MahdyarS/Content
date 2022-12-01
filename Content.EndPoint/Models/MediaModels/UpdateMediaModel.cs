@@ -11,7 +11,7 @@
         public int? PresenterId { get; set; }
         public int Price { get; set; }
         public string Poster { get; set; }
-
+        public bool IsFree { get; set; }
 
     }
 }
