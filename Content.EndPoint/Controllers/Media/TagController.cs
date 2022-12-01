@@ -11,10 +11,12 @@ namespace Content.EndPoint.Controllers.Media
     public class TagController : ControllerBase
     {
         private readonly Context _context;
+        private readonly Ram.Ram _ram;
 
-        public TagController(Context context)
+        public TagController(Context context, Ram.Ram ram)
         {
             _context = context;
+            _ram = ram;
         }
 
         [HttpGet("create-tag")]
@@ -47,11 +49,16 @@ namespace Content.EndPoint.Controllers.Media
         }
 
         [HttpDelete("delete-tag/{tagId}")]
-        public async Task<IActionResult> DeleteTag(int tagId)
+        public async Task<IActionResult> DeleteTag(int tagId,bool sure)
         {
             var tag = _context.Set<Tag>().SingleOrDefault(p => p.Id == tagId);
             if (tag == null)
                 return NotFound("تگ مورد نظر یافت نشد!");
+
+            var mediaTags = _context.Set<MediaTag>().Where(p => p.TagId == tagId).ToList();
+
+            if (mediaTags.Any() && !sure)
+                return BadRequest("برخی کالا ها تگ مورد نظر را دارند. آیا از حذف این تگ مطمئنید؟");
 
             _context.Set<Tag>().Remove(tag);
             await _context.SaveChangesAsync();

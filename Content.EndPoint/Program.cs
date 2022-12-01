@@ -1,3 +1,4 @@
+using Content.EndPoint.Ram;
 using Content.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<Context>(o =>
             o.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddSingleton<Ram>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

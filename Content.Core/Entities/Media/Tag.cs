@@ -22,6 +22,7 @@ namespace Content.Core.Entities.Media
 
         public int PropertyId { get; set; }
         public string Value { get; set; }
+        public ICollection<MediaTag> MediaTags { get; set; }
 
         public Property Property { get; set; }
     }

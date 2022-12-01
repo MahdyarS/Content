@@ -8,7 +8,7 @@ namespace Content.Core.Entities.Media
 {
     public class Media : Entity
     {
-        public string? Title { get; set; }
+        public string Title { get; set; }
         public string? Description { get; set; }
         public string? Type { get; set; }
         public string? Attributes { get; set; }
@@ -19,6 +19,7 @@ namespace Content.Core.Entities.Media
         public string Poster { get; set; }
         public int ProductCode { get; set; }
 
+        public ICollection<MediaTag> MediaTags { get; set; }
         public Presenter? Presenter { get; set; }
     }
 }

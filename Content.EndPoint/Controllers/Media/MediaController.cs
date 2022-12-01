@@ -10,10 +10,12 @@ namespace Content.EndPoint.Controllers.Media
     public class MediaController : ApiController
     {
         private readonly Context _context;
+        private readonly Ram.Ram _ram;
 
-        public MediaController(Context context)
+        public MediaController(Context context, Ram.Ram ram)
         {
             _context = context;
+            _ram = ram;
         }
 
         [HttpPost("add-media")]
@@ -46,6 +48,16 @@ namespace Content.EndPoint.Controllers.Media
             };
 
             await _context.Set<Core.Entities.Media.Media>().AddAsync(media);
+
+            _ram.MediaAbstracts.Add(new Models.RamModels.MediaAbstract
+            {
+                MediaId = media.Id,
+                Attributes = media.Attributes,
+                Title = media.Title,
+                Poster = media.Poster,
+                IsActive = media.IsActive,
+                Presenter = media.Presenter
+            });
 
             await _context.SaveChangesAsync();
 
@@ -82,6 +94,27 @@ namespace Content.EndPoint.Controllers.Media
 
             _context.Set<Core.Entities.Media.Media>().Update(media);
 
+            var mediaInRam = _ram.MediaAbstracts.SingleOrDefault(p => p.MediaId == media.Id);
+            if (mediaInRam == null)
+                _ram.MediaAbstracts.Add(new Models.RamModels.MediaAbstract
+                {
+                    MediaId = media.Id,
+                    Attributes = media.Attributes,
+                    Presenter = media.Presenter,
+                    IsActive = media.IsActive,
+                    Poster = media.Poster,
+                    Title = media.Title
+                });
+            else
+            {
+                mediaInRam.Attributes = media.Attributes;
+                mediaInRam.Presenter = media.Presenter;
+                mediaInRam.IsActive = media.IsActive;
+                mediaInRam.Poster = media.Poster;
+                mediaInRam.Title = media.Title;
+            }
+                
+
             await _context.SaveChangesAsync();
 
             return Ok();
@@ -95,11 +128,42 @@ namespace Content.EndPoint.Controllers.Media
                 return NotFound("محتوای مورد نظر یافت نشد");
 
             media.IsActive = !media.IsActive;
+
             _context.Update(media);
             await _context.SaveChangesAsync();
 
+            var mediaInRam = _ram.MediaAbstracts.SingleOrDefault(p => p.MediaId == media.Id);
+            if (mediaInRam == null)
+                _ram.MediaAbstracts.Add(new Models.RamModels.MediaAbstract
+                {
+                    MediaId = media.Id,
+                    Attributes = media.Attributes,
+                    Presenter = media.Presenter,
+                    IsActive = media.IsActive,
+                    Poster = media.Poster,
+                    Title = media.Title
+                });
+            else
+                mediaInRam.IsActive = media.IsActive;
+
             return Ok();
         }
+
+
+        [HttpGet("get/{mediaId}")]
+        public IActionResult GetMediaById([FromHeader]int userId,int mediaId)
+        {
+            var media = _context.Set<Core.Entities.Media.Media>().SingleOrDefault(p => p.Id == mediaId);
+            if (media == null)
+                return NotFound("فایلی جهت نمایش یافت نشد!");
+
+            if (!_context.Set<Core.Entities.Access.MediaAccessInfo>().Any(p => p.MediaId == media.Id && p.UserId == userId))
+                return Unauthorized();
+
+            return Ok(media);
+        }
+
+        
 
         
     }
