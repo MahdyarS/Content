@@ -6,7 +6,7 @@ namespace Content.EndPoint.Ram
 {
     public class Ram
     {
-        public ICollection<MediaInRam> MediaAbstracts { get; set; }
+        public ICollection<MediaInRam> MediaInRams { get; set; }
 
         private Context _context;
         private readonly IServiceProvider _provider;
@@ -16,7 +16,7 @@ namespace Content.EndPoint.Ram
             _provider = provider;
             _context = _provider.GetService<Context>();
 
-            MediaAbstracts = _context.Set<Media>()
+            MediaInRams = _context.Set<Media>()
             .Select(p => new MediaInRam
             {
                 MediaId = p.Id,

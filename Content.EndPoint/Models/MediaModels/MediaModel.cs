@@ -2,7 +2,7 @@
 
 namespace Content.EndPoint.Models.MediaModels
 {
-    public class MediaAbstract
+    public class MediaModel
     {
         public int MediaId { get; set; }
         public string? Attributes { get; set; }

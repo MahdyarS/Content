@@ -1,9 +1,11 @@
 ﻿using Content.Core.Entities.Media;
 using Content.EndPoint.Models.Media;
 using Content.EndPoint.Models.MediaModels;
+using Content.EndPoint.Models.RamModels;
 using Content.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace Content.EndPoint.Controllers.Media
 {
@@ -50,25 +52,15 @@ namespace Content.EndPoint.Controllers.Media
             };
 
             await _context.Set<Core.Entities.Media.Media>().AddAsync(media);
-            
+
             await _context.SaveChangesAsync();
 
-            foreach (var item in req.Attributes)
+            _ram.MediaInRams.Add(new MediaInRam
             {
-                if(_ram.TagInRams.Any(p => p.TagId == item.Value && p.ExpirationDate > DateTime.Now))
-                {
-                    _ram.MediaInRams.Add(new Models.RamModels.MediaInRam
-                    {
-                        MediaId = media.Id,
-                        Attributes = media.Attributes
-                    });
-                }
-            }
+                MediaId = media.Id,
+                Attributes = media.Attributes,
+            });
 
-            foreach (var item in _ram.TagInRams)
-            {
-
-            }
 
             return Ok(media.Id);
         }
@@ -110,6 +102,8 @@ namespace Content.EndPoint.Controllers.Media
 
             if(mediaInRam != null)
                 mediaInRam.Attributes = media.Attributes;
+            else
+                _ram.MediaInRams.Add(new MediaInRam { MediaId = req.MediaId,Attributes = media.Attributes });
 
             return Ok();
         }
@@ -146,15 +140,21 @@ namespace Content.EndPoint.Controllers.Media
         [HttpGet("get-by-filter")]
         public async Task<IActionResult> GetMediaByFilter(List<GetByFilterRequest> filters)
         {
-            foreach (var item in filters)
+            var pattern = ".*";
+
+            var ids = _ram.MediaInRams.Where(p => Regex.IsMatch(p.Attributes,pattern)).Select(p => p.MediaId).ToList();
+
+            return Ok((await _context.Set<Core.Entities.Media.Media>().Where(p => ids.Contains(p.Id))
+            .Select(p => new MediaModel
             {
-                foreach (var tag in item.TagIds)
-                {
-
-                }
-            }
-
-            return Ok();
+                MediaId = p.Id,
+                Poster = p.Poster,
+                Attributes = p.Attributes,
+                IsActive = p.IsActive,
+                IsFree = p.IsFree,
+                Presenter = p.Presenter,
+                Title = p.Title,
+            }).ToListAsync()));
         }
 
         
